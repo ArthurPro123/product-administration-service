@@ -1,0 +1,69 @@
+version: '3.8'
+services:
+
+#   app:
+#     build: .
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       # - .:/app
+#       - ./app:/app  # Mount only the app directory
+
+#       - ${SECRETS_DIR_PATH}:/run/secrets:ro   # read‑only mount
+#           # SECRETS_DIR_PATH is set in the .env file.
+
+#       - ./.env:/app/.env  # Mount the .env file too 
+
+#     environment:
+#       - FLASK_APP=app:create_app
+#       - FLASK_ENV=development
+#       - FLASK_RUN_PORT=5000
+#     command: >
+#       flask run --debug
+#         --host=0.0.0.0
+#         --cert=/run/secrets/cert.pem
+#         --key=/run/secrets/key.pem
+
+
+  # Without https
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # - .:/app
+      - ./app:/app  # Mount only the app directory
+      - ${SECRETS_DIR_PATH}:/run/secrets:ro   # read‑only mount
+      - ./.env:/app/.env  # Mount the .env file too 
+
+    environment:
+      - FLASK_APP=app:create_app
+      - FLASK_ENV=development
+      - FLASK_RUN_PORT=5000
+      - DISABLE_HTTPS=true  # HTTPS off for Selenium.
+    command: >
+      flask run --debug
+        --host=0.0.0.0
+
+
+  test:
+    build: .
+    volumes:
+      - ./app:/app
+      - ./tests:/app/tests        # Tests volume
+      - ./pyproject.toml:/app/pyproject.toml  # Add this line
+    environment:
+      - FLASK_APP=app:create_app
+      # - FLASK_ENV=testing
+      - FLASK_ENV=${ENV}    # ← This will read 'development' from .env
+
+    # Variant 1: Used with vim-test, which runs pytest itself:
+    command: tail -f /dev/null  # Keeps the container running.
+
+    # Variant 2: When used as a standalone test runner:
+    # command: pytest -x --spec --cov=app --cov-report=term-missing --tb=short
+
+    depends_on:
+      - app
+
+

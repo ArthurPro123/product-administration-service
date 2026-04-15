@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "your-project-name"
+version = "0.1.0"
+
+dependencies = [
+    "Werkzeug>=3.1.4,<4.0.0",
+    "SQLAlchemy>=2.0.44,<3.0.0",
+    "Flask>=3.1.2,<4.0.0",
+    "Flask-SQLAlchemy>=3.1.0,<4.0.0",
+    "factory-boy==3.3.0",
+    "requests==2.31.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0,<8.0.0",
+    "pytest-spec>=3.2.0,<4.0.0",
+    "pytest-cov>=4.1.0,<5.0.0",
+    "behave==1.2.6",
+    "selenium==4.15.2",
+		"compare==0.2b0",
+]
+
+dev = [
+]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+
+log_cli = true
+log_cli_level = "INFO"
+
+addopts = """
+		-x
+		--spec
+		--cov=routes
+		--cov-report=term-missing
+		--tb=short
+"""
+		# Alternative options:
+		# --cov-branch
+		# --cov-report=html
+			#
+			# Generates a nice html table.
+
+# Make the style of log lines match the overall layout 
+# when used with -v in place of --spec:
+## log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
