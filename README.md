@@ -9,10 +9,10 @@
 -->
   </tr>
   <tr>
-    <td align="center"><b>Web UI</b></td>
+    <td align="center"><small>Web UI</small></td>
 <!--
-    <td align="center"><b>Behave</b></td>
-    <td align="center"><b>SonarQube</b></td>
+    <td align="center"><small>Behave</small></td>
+    <td align="center"><small>SonarQube</small></td>
 -->
   </tr>
 </table>
