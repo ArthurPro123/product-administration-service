@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,20 +27,20 @@ jobs:
         echo "SECRETS_DIR_PATH=./secrets" >> .env
 
 
-    # --- 1. Run app --- #
-
-    - name: Start app container (for both test suites)
-      run: |
-        docker compose up -d --build app
-        sleep 10
-
-
     # --- 2. Run another instance of app for testing with pytest --- #
 
     - name: Run pytest (in your test container)
       run: |
         docker compose up -d test
         docker compose exec -T test pytest tests/ -v --spec --no-cov
+
+
+    # --- 1. Run app --- #
+
+    - name: Start app container (for both test suites)
+      run: |
+        docker compose up -d --build app
+        sleep 10
 
 
     # --- 3. Run behave in its own container --- #
