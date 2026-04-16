@@ -34,14 +34,15 @@ jobs:
         docker compose up -d test
         docker compose exec -T test pytest tests/ -v --spec --no-cov
 
-    - name: Run BDD tests
+    - name: Run BDD tests (in official Playwright container)
       run: |
         docker run --rm \
           --network host \
-          -v $(pwd):/app \
+          -v $(pwd)/features:/app/features \
+          -v $(pwd)/app:/app/app \
           -w /app \
           mcr.microsoft.com/playwright/python:v1.40.0-focal \
-          bash -c "pip install behave requests && python -m behave features/ -D browser=chromium -D ui=false"
+          python -c "import subprocess, sys; subprocess.run([sys.executable, '-m', 'pip', 'install', 'behave', 'requests']); subprocess.run(['behave', 'features/', '-D', 'browser=chromium', '-D', 'ui=false'])"
 
     - name: Shutdown
       if: always()
