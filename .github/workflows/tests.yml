@@ -29,14 +29,17 @@ jobs:
         docker compose up -d --build app test
         sleep 10
 
+    - name: Install Playwright browsers in container
+      run: |
+        docker compose exec -T -u root test apt-get update
+        docker compose exec -T -u root test apt-get install -y wget gnupg
+        docker compose exec -T -u root test pip install playwright
+        docker compose exec -T -u root test playwright install chromium
+        docker compose exec -T -u root test playwright install-deps chromium
+
     - name: Run pytest (without coverage)
       run: |
         docker compose exec -T test pytest tests/ -v --spec --no-cov
-
-
-    - name: Verify features directory is mounted
-      run: |
-        docker compose exec -T test ls -la /app/features/
 
     - name: Run BDD tests
       run: |
