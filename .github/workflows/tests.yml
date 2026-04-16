@@ -44,18 +44,30 @@ jobs:
     #     echo "Waiting for app to be ready..."
     #     sleep 10
 
-
-    # --- 3. Run behave in its own container --- #
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install behave requests playwright
+        playwright install chromium
 
     - name: Run BDD tests
       run: |
-        # Start app in background
-        docker compose up -d app
-        echo "Waiting for app to be ready..."
+        # Start Flask app in background
+        export FLASK_APP=app:create_app
+        export FLASK_ENV=development
+        export DISABLE_HTTPS=true
+        flask run --host=0.0.0.0 --port=5000 &
+
+    # --- 3. Run behave in its own container --- #
+
+        # Wait for app to be ready
         sleep 10
         
-        # Run bdd-tests with host network
-        docker compose -f docker-compose.ci.yml up --abort-on-container-exit bdd-tests
+        # Run behave tests
+        behave features/ -D browser=chromium -D ui=false
+        
+        # Kill Flask app
+        kill %1
 
 
     # --- Clean up --- #
