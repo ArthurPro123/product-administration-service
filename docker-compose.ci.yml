@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app
+      - ${SECRETS_DIR_PATH}:/run/secrets:ro
+      - ./.env:/app/.env
+    environment:
+      - FLASK_APP=app:create_app
+      - FLASK_ENV=development
+      - FLASK_RUN_PORT=5000
+      - DISABLE_HTTPS=true
+    command: flask run --debug --host=0.0.0.0
+    networks:
+      - ci_network
+
+  bdd-tests:
+    image: mcr.microsoft.com/playwright/python:v1.40.0-focal
+    depends_on:
+      - app
+    working_dir: /app
+    volumes:
+      - ./features:/app/features
+      - ./app:/app/app
+    environment:
+      - BASE_URL=http://app:5000
+    networks:
+      - ci_network
+    command: >
+      bash -c "
+        echo 'Waiting for app to be ready...' &&
+        while ! curl -s http://app:5000/health > /dev/null; do
+          sleep 1
+        done &&
+        echo 'App is ready! Running tests...' &&
+        pip install behave requests playwright &&
+        playwright install chromium &&
+        behave features/ -D browser=chromium -D ui=false
+      "
+
+networks:
+  ci_network:
+    driver: bridge

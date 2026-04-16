@@ -38,30 +38,19 @@ jobs:
 
     # --- 2. Run another instance of the app for BDD tests --- #
 
-    - name: Start app for BDD tests
-      run: |
-        docker compose up -d app
-        echo "Waiting for app to be ready..."
-        sleep 10
+    # - name: Start app for BDD tests
+    #   run: |
+    #     docker compose up -d app
+    #     echo "Waiting for app to be ready..."
+    #     sleep 10
 
 
     # --- 3. Run behave in its own container --- #
 
-    - name: Run BDD tests (using host network)
+    - name: Run BDD tests
       run: |
-        docker run --rm \
-          --network host \
-          -v $(pwd)/features:/app/features \
-          -v $(pwd)/app:/app/app \
-          -w /app \
-          mcr.microsoft.com/playwright/python:v1.40.0-focal \
-          bash -c "
-            pip install behave requests playwright &&
-            playwright install chromium &&
-            # Use localhost instead of app
-            export BASE_URL=http://localhost:5000 &&
-            behave features/ -D browser=chromium -D ui=false
-          "
+        # Start everything with the CI compose file
+        docker compose -f docker-compose.ci.yml up --abort-on-container-exit bdd-tests
 
 
     # --- Clean up --- #
