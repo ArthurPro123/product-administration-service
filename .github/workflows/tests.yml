@@ -52,6 +52,9 @@ jobs:
         export FLASK_APP=app:create_app
         export FLASK_ENV=development
         export DISABLE_HTTPS=true
+
+        cd /home/runner/work/product-administration-service/product-administration-service
+
         flask run --host=0.0.0.0 --port=5000 &
         
         # Wait and check if it's running
