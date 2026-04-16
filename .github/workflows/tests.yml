@@ -38,18 +38,23 @@ jobs:
 
     # --- 2. Run another instance of the app for BDD tests --- #
 
-    - name: Start app for BDD tests
-      run: |
-        docker compose up -d app
-        echo "Waiting for app to be ready..."
-        sleep 10
+    # - name: Start app for BDD tests
+    #   run: |
+    #     docker compose up -d app
+    #     echo "Waiting for app to be ready..."
+    #     sleep 10
 
 
     # --- 3. Run behave in its own container --- #
 
-    - name: Run BDD tests (in official Playwright container)
+    - name: Run BDD tests
       run: |
-        docker compose --profile ci run --rm bdd-tests
+        # Start app in background
+        docker compose up -d app
+        echo "Waiting for app to be ready..."
+        sleep 10
+        # Run bdd-tests and stop when tests complete
+        docker compose up --abort-on-container-exit bdd-tests
 
 
     # --- Clean up --- #
