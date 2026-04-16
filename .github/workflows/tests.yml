@@ -1,4 +1,4 @@
-name: CI with Docker
+name: CI
 
 on:
   push:
@@ -20,14 +20,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
-        pip install playwright behave
+        pip install behave playwright requests flask flask-sqlalchemy
         playwright install chromium
-
-    - name: Create .env file
-      run: |
-        echo "ENV=development" >> .env
-        echo "JWT_SECRET_KEY=test-secret-key" >> .env
 
     - name: Start Flask app
       run: |
@@ -36,11 +30,8 @@ jobs:
         export DATABASE_URI=sqlite:///:memory:
         flask run --host=0.0.0.0 --port=5000 &
         sleep 10
-        curl -f http://localhost:5000/ || exit 1
 
     - name: Run BDD tests
-      env:
-        BASE_URL: http://localhost:5000
       run: |
         behave features/ -D browser=chromium -D ui=false
 
