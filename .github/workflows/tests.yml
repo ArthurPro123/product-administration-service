@@ -13,31 +13,30 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup Python for behave
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
-    - name: Install all dependencies
+    - name: Install dependencies
       run: |
         pip install -r requirements.txt
-        python -m playwright install chromium
-        python -m playwright install-deps chromium
+        pip install playwright
+        playwright install chromium
 
     - name: Create .env file
       run: |
         echo "ENV=development" >> .env
         echo "JWT_SECRET_KEY=test-secret-key" >> .env
 
-    - name: Start Flask app for BDD tests
+    - name: Start Flask app
       run: |
         export FLASK_APP=app/app.py
         export ENV=development
         export DATABASE_URI=sqlite:///:memory:
-        export JWT_SECRET_KEY=test-secret-key
         flask run --host=0.0.0.0 --port=5000 &
         sleep 10
-        curl -f http://localhost:5000/ || (echo "App failed to start" && exit 1)
+        curl -f http://localhost:5000/ || exit 1
 
     - name: Run BDD tests
       env:
@@ -45,7 +44,9 @@ jobs:
       run: |
         behave features/ -D browser=chromium -D ui=false
 
-    - name: Shutdown
-      if: always()
+    - name: Run pytest with Docker
       run: |
-        pkill -f flask || true
+        docker compose up -d --build app test
+        sleep 10
+        docker compose exec -T test pytest tests/ -v --spec --no-cov
+        docker compose down
