@@ -29,36 +29,34 @@ jobs:
         docker compose up -d --build app test
         sleep 10
 
-    - name: Install Playwright browsers in container
-      run: |
-        docker compose exec -T -u root test apt-get update
-        docker compose exec -T -u root test apt-get install -y wget gnupg
-        docker compose exec -T -u root test pip install playwright
-        # Skip dependency auto-installation, install manually for Trixie
-        docker compose exec -T -u root test playwright install chromium --with-deps false
-        # Install only the essential dependencies for Trixie
-        docker compose exec -T -u root test apt-get install -y \
-          libnss3 \
-          libxss1 \
-          libasound2 \
-          libatk-bridge2.0-0 \
-          libgtk-3-0 \
-          libdrm2 \
-          libgbm1 \
-          libxkbcommon0 \
-          libxcomposite1 \
-          libxdamage1 \
-          libxfixes3 \
-          libxrandr2 \
-          libxtst6
-
-    - name: Run pytest (without coverage)
+    - name: Run pytest (inside container)
       run: |
         docker compose exec -T test pytest tests/ -v --spec --no-cov
 
-    - name: Run BDD tests
+    - name: Setup Python for behave
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install behave dependencies
       run: |
-        docker compose exec -T test behave features/ -D browser=chromium -D ui=false
+        pip install behave playwright
+        playwright install chromium
+        playwright install-deps chromium
+
+    - name: Start Flask app for BDD tests
+      run: |
+        export FLASK_APP=app/app.py
+        export ENV=development
+        export DATABASE_URI=sqlite:///:memory:
+        flask run --host=0.0.0.0 --port=5000 &
+        sleep 5
+
+    - name: Run BDD tests (outside container)
+      env:
+        BASE_URL: http://localhost:5000
+      run: |
+        behave features/ -D browser=chromium -D ui=false
 
     - name: Shutdown containers
       if: always()

@@ -53,7 +53,6 @@ services:
       - ./app:/app
       - ./tests:/app/tests        # Tests volume
       - ./pyproject.toml:/app/pyproject.toml  # Add this line
-      - ./features:/app/features
     environment:
       - FLASK_APP=app:create_app
       # - FLASK_ENV=testing
