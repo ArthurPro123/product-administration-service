@@ -1,37 +1,8 @@
-version: '3.8'
-services:
-
-#   app:
-#     build: .
-#     ports:
-#       - "5000:5000"
-#     volumes:
-#       # - .:/app
-#       - ./app:/app  # Mount only the app directory
-
-#       - ${SECRETS_DIR_PATH}:/run/secrets:ro   # read‑only mount
-#           # SECRETS_DIR_PATH is set in the .env file.
-
-#       - ./.env:/app/.env  # Mount the .env file too 
-
-#     environment:
-#       - FLASK_APP=app:create_app
-#       - FLASK_ENV=development
-#       - FLASK_RUN_PORT=5000
-#     command: >
-#       flask run --debug
-#         --host=0.0.0.0
-#         --cert=/run/secrets/cert.pem
-#         --key=/run/secrets/key.pem
-
-
-  # Without https
   app:
     build: .
     ports:
       - "5000:5000"
     volumes:
-      # - .:/app
       - ./app:/app  # Mount only the app directory
       - ${SECRETS_DIR_PATH}:/run/secrets:ro   # read‑only mount
       - ./.env:/app/.env  # Mount the .env file too 
