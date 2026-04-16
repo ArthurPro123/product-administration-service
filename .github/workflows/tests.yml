@@ -34,8 +34,23 @@ jobs:
         docker compose exec -T -u root test apt-get update
         docker compose exec -T -u root test apt-get install -y wget gnupg
         docker compose exec -T -u root test pip install playwright
-        docker compose exec -T -u root test playwright install chromium
-        docker compose exec -T -u root test playwright install-deps chromium
+        # Skip dependency auto-installation, install manually for Trixie
+        docker compose exec -T -u root test playwright install chromium --with-deps false
+        # Install only the essential dependencies for Trixie
+        docker compose exec -T -u root test apt-get install -y \
+          libnss3 \
+          libxss1 \
+          libasound2 \
+          libatk-bridge2.0-0 \
+          libgtk-3-0 \
+          libdrm2 \
+          libgbm1 \
+          libxkbcommon0 \
+          libxcomposite1 \
+          libxdamage1 \
+          libxfixes3 \
+          libxrandr2 \
+          libxtst6
 
     - name: Run pytest (without coverage)
       run: |
