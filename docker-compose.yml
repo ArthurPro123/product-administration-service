@@ -1,4 +1,9 @@
 version: '3.8'
+
+networks:
+  bdd_network:
+    driver: bridge
+
 services:
 
 # Note: `- DISABLE_HTTPS=true` is used for behave.
@@ -21,6 +26,8 @@ services:
     command: >
       flask run --debug
         --host=0.0.0.0
+    networks:
+      - bdd_network
 
 
   # For running pytest:
@@ -41,24 +48,28 @@ services:
     # Variant 2: When used as a standalone test runner:
     # command: pytest -x --spec --cov=app --cov-report=term-missing --tb=short
 
-    depends_on:
-      - app
+    networks:
+      - bdd_network
+    # depends_on:
+    #   - app
 
 
 
   bdd-tests:
-      image: mcr.microsoft.com/playwright/python:v1.40.0-focal
-      profiles:
-        - ci  # ONLY runs when you explicitly enable this profile
-      working_dir: /app
-      volumes:
-        - ./features:/app/features
-        - ./app:/app/app
-      environment:
-        - BASE_URL=http://app:5000
-      command: >
-        bash -c "
-          pip install behave requests playwright &&
-          playwright install chromium &&
-          behave features/ -D browser=chromium -D ui=false
-        "
+    image: mcr.microsoft.com/playwright/python:v1.40.0-focal
+    profiles:
+      - ci  # ONLY runs when you explicitly enable this profile
+    working_dir: /app
+    volumes:
+      - ./features:/app/features
+      - ./app:/app/app
+    environment:
+      - BASE_URL=http://app:5000
+    command: >
+      bash -c "
+        pip install behave requests playwright &&
+        playwright install chromium &&
+        behave features/ -D browser=chromium -D ui=false
+      "
+  networks:
+    - bdd_network

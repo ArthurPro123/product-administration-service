@@ -53,9 +53,7 @@ jobs:
         docker compose up -d app
         echo "Waiting for app to be ready..."
         sleep 10
-
-        NETWORK_NAME=$(docker compose --profile ci ps -q app | xargs docker inspect -f '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s" $net}}{{end}}') 
-        docker compose --profile ci run --rm --network $NETWORK_NAME bdd-tests
+        docker compose --profile ci run --rm bdd-tests
 
 
     # --- Clean up --- #
