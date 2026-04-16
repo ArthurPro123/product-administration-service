@@ -38,9 +38,10 @@ jobs:
 
     # --- 2. Run another instance of the app for BDD tests --- #
 
-    - name: Start the app container (for BDD tests)
+    - name: Start app for BDD tests
       run: |
-        docker compose up -d --build app
+        docker compose up -d app
+        echo "Waiting for app to be ready..."
         sleep 10
 
 
@@ -48,17 +49,7 @@ jobs:
 
     - name: Run BDD tests (in official Playwright container)
       run: |
-        docker run --rm \
-          --network host \
-          -v $(pwd)/features:/app/features \
-          -v $(pwd)/app:/app/app \
-          -w /app \
-          mcr.microsoft.com/playwright/python:v1.40.0-focal \
-          bash -c "
-            pip install behave requests playwright &&
-            playwright install chromium &&
-            behave features/ -D browser=chromium -D ui=false
-          "
+        docker compose --profile ci run --rm bdd-tests
 
 
     # --- Clean up --- #

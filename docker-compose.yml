@@ -45,3 +45,20 @@ services:
       - app
 
 
+
+  bdd-tests:
+      image: mcr.microsoft.com/playwright/python:v1.40.0-focal
+      profiles:
+        - ci  # ONLY runs when you explicitly enable this profile
+      working_dir: /app
+      volumes:
+        - ./features:/app/features
+        - ./app:/app/app
+      environment:
+        - BASE_URL=http://app:5000
+      command: >
+        bash -c "
+          pip install behave requests playwright &&
+          playwright install chromium &&
+          behave features/ -D browser=chromium -D ui=false
+        "
