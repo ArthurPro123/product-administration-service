@@ -1,5 +1,6 @@
-
 # RESTful Product Administration Microservice with Lightweight Web UI
+
+[![CI](https://github.com/ArthurPro123/product-administration-service/actions/workflows/test.yml/badge.svg)](https://github.com/ArthurPro123/product-administration-service/actions/workflows/test.yml)
 
 **A production-ready microservice featuring JWT authentication, role-based permissions, and a complete QA automation suite (pytest, behave, Playwright).**
 
