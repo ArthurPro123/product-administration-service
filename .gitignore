@@ -23,6 +23,11 @@ sonar-project.properties
 start-vault-source-it.sh
 coverage.xml
 app/tests/
+
+private/
+CONTEXT.TXT
+tags
+
 Session.vim
 features_with_selenium/
 *.mp4
