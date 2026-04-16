@@ -49,7 +49,12 @@ jobs:
 
     - name: Run BDD tests
       run: |
-        # Start everything with the CI compose file
+        # Start app in background
+        docker-compose up -d app
+        echo "Waiting for app to be ready..."
+        sleep 10
+        
+        # Run bdd-tests with host network
         docker compose -f docker-compose.ci.yml up --abort-on-container-exit bdd-tests
 
 
