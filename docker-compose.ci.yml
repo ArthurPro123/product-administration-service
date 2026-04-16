@@ -30,26 +30,7 @@ services:
       - BASE_URL=http://app:5000
     networks:
       - ci_network
-    command: >
-      bash -c "
-        echo 'Waiting for app to be ready...' &&
-        python -c '
-import requests, time, sys
-for i in range(30):
-    try:
-        requests.get(\"http://app:5000/health\", timeout=2)
-        print(\"App is ready!\")
-        sys.exit(0)
-    except:
-        print(f\"Waiting for app... ({i+1}/30)\")
-        time.sleep(1)
-print(\"App failed to start\")
-sys.exit(1)
-' &&
-        pip install behave requests playwright &&
-        playwright install chromium &&
-        behave features/ -D browser=chromium -D ui=false
-      "
+    command: sh -c "sleep 10 && pip install behave requests playwright && playwright install chromium && behave features/ -D browser=chromium -D ui=false"
 
 networks:
   ci_network:
