@@ -54,7 +54,11 @@ jobs:
           -v $(pwd)/app:/app/app \
           -w /app \
           mcr.microsoft.com/playwright/python:v1.40.0-focal \
-          python -c "import subprocess, sys; subprocess.run([sys.executable, '-m', 'pip', 'install', 'behave', 'requests']); subprocess.run(['behave', 'features/', '-D', 'browser=chromium', '-D', 'ui=false'])"
+          bash -c "
+            pip install behave requests playwright &&
+            playwright install chromium &&
+            behave features/ -D browser=chromium -D ui=false
+          "
 
 
     # --- Clean up --- #
