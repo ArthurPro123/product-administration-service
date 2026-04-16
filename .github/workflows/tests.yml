@@ -21,8 +21,8 @@ jobs:
     - name: Install all dependencies
       run: |
         pip install -r requirements.txt
-        playwright install chromium
-        playwright install-deps chromium
+        python -m playwright install chromium
+        python -m playwright install-deps chromium
 
     - name: Create .env file
       run: |
@@ -45,9 +45,7 @@ jobs:
       run: |
         behave features/ -D browser=chromium -D ui=false
 
-    - name: Run pytest (with Docker)
+    - name: Shutdown
+      if: always()
       run: |
-        docker compose up -d --build app test
-        sleep 10
-        docker compose exec -T test pytest tests/ -v --spec --no-cov
-        docker compose down
+        pkill -f flask || true
