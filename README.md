@@ -7,19 +7,21 @@
 <table align="center">
   <tr>
     <td align="center"><img src="screenshots/ui.png" width="200"/></td>
+    <td align="center"><img src="screenshots/behave.png" width="200"/></td>
+    <td align="center"><img src="screenshots/pytest.png" width="200"/></td>
+    <td align="center"><img src="screenshots/pytest-html.png" width="200"/></td>
     <td align="center"><img src="screenshots/github-actions.png" width="200"/></td>
 <!--
-    <td align="center"><img src="screenshots/pytest.png" width="200"/></td>
-    <td align="center"><img src="screenshots/behave.png" width="200"/></td>
     <td align="center"><img src="screenshots/sonar.png" width="200"/></td>
 -->
   </tr>
   <tr>
     <td align="center"><small>Web UI</small></td>
+    <td align="center"><small>Behave</small></td>
+    <td align="center"><small>pytest - Report</small></td>
+    <td align="center"><small>pytest</small></td>
     <td align="center"><small>GitHub Actions</small></td>
 <!--
-    <td align="center"><small>pytest</small></td>
-    <td align="center"><small>Behave</small></td>
     <td align="center"><small>SonarQube</small></td>
 -->
   </tr>

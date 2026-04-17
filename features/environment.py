@@ -30,6 +30,12 @@ from playwright.sync_api import sync_playwright, expect
 # CONFIGURATION
 # ============================================
 
+# context.config = {
+#     'base_url': getenv('BASE_URL', 'http://localhost:5000'),
+#     'wait_seconds': int(getenv('WAIT_SECONDS', '30')),
+#     'id_attr_prefix': 'product_',
+# }
+
 WAIT_SECONDS = int(getenv('WAIT_SECONDS', '30'))
 BASE_URL = getenv('BASE_URL', 'http://localhost:5000')
 ID_PREFIX = 'product_'

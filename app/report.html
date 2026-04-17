@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 17-Apr-2026 at 12:07:59 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">38 tests took 00:00:18.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">38 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.11.14&#34;, &#34;Platform&#34;: &#34;Linux-6.1.0-41-amd64-x86_64-with-glibc2.41&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;7.4.0&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;spec&#34;: &#34;3.0.0&#34;, &#34;cov&#34;: &#34;4.1.0&#34;, &#34;Faker&#34;: &#34;18.11.2&#34;}}, &#34;tests&#34;: {&#34;tests/test_models.py::test_create_a_product_without_db&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_create_a_product_without_db&#34;, &#34;duration&#34;: &#34;188 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_create_a_product_without_db&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;188 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_models.py::test_add_a_product_using_dict&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_add_a_product_using_dict&#34;, &#34;duration&#34;: &#34;72 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_add_a_product_using_dict&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;72 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,381 - common.logging_config - INFO - Saving Test Product\n2026-04-17 12:07:41,385 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,387 - common.logging_config - INFO - Processing lookup for id 1 ...\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:24 Saving Test Product\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     common.logging_config:product.py:77 Processing lookup for id 1 ...\n\n&#34;}], &#34;tests/test_models.py::test_add_multiple_products_using_factory&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_add_multiple_products_using_factory&#34;, &#34;duration&#34;: &#34;97 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_add_multiple_products_using_factory&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;97 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,428 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,468 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\n2026-04-17 12:07:41,468 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\n2026-04-17 12:07:41,468 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,471 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\n2026-04-17 12:07:41,471 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\n2026-04-17 12:07:41,471 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,472 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\n2026-04-17 12:07:41,472 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\n2026-04-17 12:07:41,473 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,474 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\n2026-04-17 12:07:41,474 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\n2026-04-17 12:07:41,475 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,476 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\n2026-04-17 12:07:41,476 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\n2026-04-17 12:07:41,476 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,478 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\n2026-04-17 12:07:41,478 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\n2026-04-17 12:07:41,478 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,479 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 6\n2026-04-17 12:07:41,479 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 6\n2026-04-17 12:07:41,479 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,480 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\n2026-04-17 12:07:41,480 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\n2026-04-17 12:07:41,481 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,482 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\n2026-04-17 12:07:41,482 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\n2026-04-17 12:07:41,482 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,483 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\n2026-04-17 12:07:41,483 - tests.conftest - INFO - In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\n2026-04-17 12:07:41,483 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,484 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,485 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,485 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,486 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n2026-04-17 12:07:41,487 - tests.conftest - INFO - Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 5\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 6\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 3\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:117 In &amp;#x27;test_add_a_product_using_factory()&amp;#x27;, &amp;#x27;product.category_id&amp;#x27;: 1\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\nINFO     tests.conftest:test_models.py:134 Attributes to compare (from __dict__): [&amp;#x27;price&amp;#x27;, &amp;#x27;available&amp;#x27;, &amp;#x27;name&amp;#x27;, &amp;#x27;description&amp;#x27;, &amp;#x27;category_id&amp;#x27;]\n\n&#34;}], &#34;tests/test_models.py::test_create_product_with_invalid_category_id&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_create_product_with_invalid_category_id&#34;, &#34;duration&#34;: &#34;36 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_create_product_with_invalid_category_id&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;36 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_models.py::test_update_a_product&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_update_a_product&#34;, &#34;duration&#34;: &#34;52 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_update_a_product&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;52 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,567 - tests.conftest - INFO - In test_update_a_product(). Created a product : &amp;lt;Product Towels id=[None]&amp;gt;\n2026-04-17 12:07:41,567 - tests.conftest - INFO - In test_update_a_product(). Created a product : &amp;lt;Product Towels id=[None]&amp;gt;\n2026-04-17 12:07:41,567 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,573 - tests.conftest - INFO - In test_update_a_product(). Added the product : &amp;lt;Product Towels id=[1]&amp;gt; to the database\n2026-04-17 12:07:41,573 - tests.conftest - INFO - In test_update_a_product(). Added the product : &amp;lt;Product Towels id=[1]&amp;gt; to the database\n2026-04-17 12:07:41,573 - common.logging_config - INFO - Saving Bag\n2026-04-17 12:07:41,577 - common.logging_config - INFO - Processing lookup for id 1 ...\n2026-04-17 12:07:41,578 - common.logging_config - INFO - Processing all Products\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_models.py:175 In test_update_a_product(). Created a product : &amp;lt;Product Towels id=[None]&amp;gt;\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:177 In test_update_a_product(). Added the product : &amp;lt;Product Towels id=[1]&amp;gt; to the database\nINFO     common.logging_config:product.py:46 Saving Bag\nINFO     common.logging_config:product.py:77 Processing lookup for id 1 ...\nINFO     common.logging_config:product.py:62 Processing all Products\n\n&#34;}], &#34;tests/test_models.py::test_remove_a_product&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_remove_a_product&#34;, &#34;duration&#34;: &#34;47 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_remove_a_product&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;47 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,619 - tests.conftest - INFO - In test_remove_a_product(). Created a product : &amp;lt;Product Wrench id=[None]&amp;gt;\n2026-04-17 12:07:41,619 - tests.conftest - INFO - In test_remove_a_product(). Created a product : &amp;lt;Product Wrench id=[None]&amp;gt;\n2026-04-17 12:07:41,619 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,623 - tests.conftest - INFO - In test_remove_a_product(). Added the product : &amp;lt;Product Wrench id=[1]&amp;gt; to the database\n2026-04-17 12:07:41,623 - tests.conftest - INFO - In test_remove_a_product(). Added the product : &amp;lt;Product Wrench id=[1]&amp;gt; to the database\n2026-04-17 12:07:41,623 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,624 - common.logging_config - INFO - Deleting Wrench\n2026-04-17 12:07:41,626 - common.logging_config - INFO - Processing all Products\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_models.py:202 In test_remove_a_product(). Created a product : &amp;lt;Product Wrench id=[None]&amp;gt;\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:204 In test_remove_a_product(). Added the product : &amp;lt;Product Wrench id=[1]&amp;gt; to the database\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     common.logging_config:product.py:54 Deleting Wrench\nINFO     common.logging_config:product.py:62 Processing all Products\n\n&#34;}], &#34;tests/test_models.py::test_practice&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_practice&#34;, &#34;duration&#34;: &#34;55 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_practice&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;55 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,665 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,669 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,670 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,671 - tests.conftest - INFO - Number of products in the database is 1\n2026-04-17 12:07:41,671 - tests.conftest - INFO - Number of products in the database is 1\n2026-04-17 12:07:41,672 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,673 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,674 - tests.conftest - INFO - Number of products in the database is 2\n2026-04-17 12:07:41,674 - tests.conftest - INFO - Number of products in the database is 2\n2026-04-17 12:07:41,675 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,676 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,677 - tests.conftest - INFO - Number of products in the database is 3\n2026-04-17 12:07:41,677 - tests.conftest - INFO - Number of products in the database is 3\n2026-04-17 12:07:41,678 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,679 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,680 - tests.conftest - INFO - Number of products in the database is 4\n2026-04-17 12:07:41,680 - tests.conftest - INFO - Number of products in the database is 4\n2026-04-17 12:07:41,681 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,682 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:41,683 - tests.conftest - INFO - Number of products in the database is 5\n2026-04-17 12:07:41,683 - tests.conftest - INFO - Number of products in the database is 5\n2026-04-17 12:07:41,683 - common.logging_config - INFO - Processing all Products\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:226 Number of products in the database is 1\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:226 Number of products in the database is 2\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:226 Number of products in the database is 3\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:226 Number of products in the database is 4\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_models.py:226 Number of products in the database is 5\nINFO     common.logging_config:product.py:62 Processing all Products\n\n&#34;}], &#34;tests/test_models.py::test_find_a_product_by_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_find_a_product_by_name&#34;, &#34;duration&#34;: &#34;237 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_find_a_product_by_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;237 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,745 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,745 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,746 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,748 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,748 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,748 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,749 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,749 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,749 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,750 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,750 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,750 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,751 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,751 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,751 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,752 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,752 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,752 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,753 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,753 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,753 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,753 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,753 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,754 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,754 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,754 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,755 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,755 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,755 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,756 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,756 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,756 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,756 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,757 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,757 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,757 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,758 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,758 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,758 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,759 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,759 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,759 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,760 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,760 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,760 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,761 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,761 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,761 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,762 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,762 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,762 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,763 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,763 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,763 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,764 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,764 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,764 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,765 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,765 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,765 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,766 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,766 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,766 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,767 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,767 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,767 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,768 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,768 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,768 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,769 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,769 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,769 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,770 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,770 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,770 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,771 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,771 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,771 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,772 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,772 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,772 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,773 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,773 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,773 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,774 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,774 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,774 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,775 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,775 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,776 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,777 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,777 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,777 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,778 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,778 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,778 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,779 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,779 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,779 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,780 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,780 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,780 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,781 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,781 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,781 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,782 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,782 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,782 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,783 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,783 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,783 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,784 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,784 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,784 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,785 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,785 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,785 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,786 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,786 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,786 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,787 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,787 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,788 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,788 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,788 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,789 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,790 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,790 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,790 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,791 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,791 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,791 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,792 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,792 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,792 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,793 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,793 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,793 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,795 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,795 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,795 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,796 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,796 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,796 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,797 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,797 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,797 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,798 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,798 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,798 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,799 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,799 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,800 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,801 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,801 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,801 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,802 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,802 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,802 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,803 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,803 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,804 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,805 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,805 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,805 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,806 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,806 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,806 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,807 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,807 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,808 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,809 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,809 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,809 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,810 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,810 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,810 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,812 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,812 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,812 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,813 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,813 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,813 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,814 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,814 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,814 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,815 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,815 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,816 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,817 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,817 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,817 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,818 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,818 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,818 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,819 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,819 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,820 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,821 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,821 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,821 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,822 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,822 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,822 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,823 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,823 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,824 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,825 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,825 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,825 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,826 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,826 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,826 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,828 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,828 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,828 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,829 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,829 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,829 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,830 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,830 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,831 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,832 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,832 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,832 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,833 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,833 - tests.conftest - INFO - created product name: Banana\n2026-04-17 12:07:41,833 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,834 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,834 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,835 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,836 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,836 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,836 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,838 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,838 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,838 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,839 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,839 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,839 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,840 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,840 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,841 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,842 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,842 - tests.conftest - INFO - created product name: Chevy\n2026-04-17 12:07:41,842 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,843 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,843 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,843 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,844 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,844 - tests.conftest - INFO - created product name: Ford\n2026-04-17 12:07:41,844 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:41,845 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,845 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,846 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,847 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,847 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,847 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,848 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,848 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,848 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,849 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,849 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,850 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,851 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,851 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,851 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,852 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,852 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,852 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,853 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,853 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,853 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,855 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,855 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,855 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,857 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,857 - tests.conftest - INFO - created product name: Pants\n2026-04-17 12:07:41,857 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,858 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,858 - tests.conftest - INFO - created product name: Pots\n2026-04-17 12:07:41,859 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:41,860 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,860 - tests.conftest - INFO - created product name: Apple\n2026-04-17 12:07:41,860 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:41,862 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,862 - tests.conftest - INFO - created product name: Wrench\n2026-04-17 12:07:41,862 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,864 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,864 - tests.conftest - INFO - created product name: Towels\n2026-04-17 12:07:41,864 - common.logging_config - INFO - Saving Towels\n2026-04-17 12:07:41,865 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,865 - tests.conftest - INFO - created product name: Hammer\n2026-04-17 12:07:41,865 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,867 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,867 - tests.conftest - INFO - created product name: Hat\n2026-04-17 12:07:41,867 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:41,868 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,868 - tests.conftest - INFO - created product name: Shirt\n2026-04-17 12:07:41,868 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,871 - tests.conftest - INFO - The name of the first product created: Banana\n2026-04-17 12:07:41,871 - tests.conftest - INFO - The name of the first product created: Banana\n2026-04-17 12:07:41,916 - tests.conftest - INFO - Products created with the same name &amp;#x27;Banana&amp;#x27;: 9\n2026-04-17 12:07:41,916 - tests.conftest - INFO - Products created with the same name &amp;#x27;Banana&amp;#x27;: 9\n2026-04-17 12:07:41,917 - common.logging_config - INFO - Processing name query for Banana ...\n2026-04-17 12:07:41,920 - tests.conftest - INFO - Found 9 products with the name &amp;#x27;Banana&amp;#x27; in the database\n2026-04-17 12:07:41,920 - tests.conftest - INFO - Found 9 products with the name &amp;#x27;Banana&amp;#x27; in the database\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Towels\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Towels\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Towels\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:245 created product name: Towels\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Banana\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:245 created product name: Chevy\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Ford\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Towels\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     tests.conftest:test_models.py:245 created product name: Pots\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     tests.conftest:test_models.py:245 created product name: Apple\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     tests.conftest:test_models.py:245 created product name: Wrench\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     tests.conftest:test_models.py:245 created product name: Towels\nINFO     common.logging_config:product.py:24 Saving Towels\nINFO     tests.conftest:test_models.py:245 created product name: Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     tests.conftest:test_models.py:245 created product name: Hat\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     tests.conftest:test_models.py:245 created product name: Shirt\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     tests.conftest:test_models.py:249 The name of the first product created: Banana\nINFO     tests.conftest:test_models.py:260 Products created with the same name &amp;#x27;Banana&amp;#x27;: 9\nINFO     common.logging_config:product.py:92 Processing name query for Banana ...\nINFO     tests.conftest:test_models.py:263 Found 9 products with the name &amp;#x27;Banana&amp;#x27; in the database\n\n&#34;}], &#34;tests/test_models.py::test_find_a_product_by_availability&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_find_a_product_by_availability&#34;, &#34;duration&#34;: &#34;58 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_find_a_product_by_availability&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;58 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:41,965 - common.logging_config - INFO - Saving Wrench\n2026-04-17 12:07:41,967 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:41,968 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,969 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:41,970 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,970 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,971 - common.logging_config - INFO - Saving Hammer\n2026-04-17 12:07:41,972 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,972 - common.logging_config - INFO - Saving Pants\n2026-04-17 12:07:41,973 - common.logging_config - INFO - Saving Chevy\n2026-04-17 12:07:41,979 - common.logging_config - INFO - Processing available query for False ...\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:24 Saving Wrench\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     common.logging_config:product.py:24 Saving Hammer\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     common.logging_config:product.py:24 Saving Pants\nINFO     common.logging_config:product.py:24 Saving Chevy\nINFO     common.logging_config:product.py:107 Processing available query for False ...\n\n&#34;}], &#34;tests/test_models.py::test_find_a_product_by_category&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_models.py::test_find_a_product_by_category&#34;, &#34;duration&#34;: &#34;58 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_models.py::test_find_a_product_by_category&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;58 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:42,024 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:42,027 - common.logging_config - INFO - Saving Pots\n2026-04-17 12:07:42,027 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:42,028 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:42,029 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:42,030 - common.logging_config - INFO - Saving Banana\n2026-04-17 12:07:42,031 - common.logging_config - INFO - Saving Hat\n2026-04-17 12:07:42,031 - common.logging_config - INFO - Saving Apple\n2026-04-17 12:07:42,032 - common.logging_config - INFO - Saving Shirt\n2026-04-17 12:07:42,033 - common.logging_config - INFO - Saving Ford\n2026-04-17 12:07:42,039 - common.logging_config - INFO - Processing category_id for 1 ...\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     common.logging_config:product.py:24 Saving Pots\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     common.logging_config:product.py:24 Saving Banana\nINFO     common.logging_config:product.py:24 Saving Hat\nINFO     common.logging_config:product.py:24 Saving Apple\nINFO     common.logging_config:product.py:24 Saving Shirt\nINFO     common.logging_config:product.py:24 Saving Ford\nINFO     common.logging_config:product.py:121 Processing category_id for 1 ...\n\n&#34;}], &#34;tests/test_routes.py::test_index&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_index&#34;, &#34;duration&#34;: &#34;41 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_index&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;41 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_routes.py::test_create_product_without_auth&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_without_auth&#34;, &#34;duration&#34;: &#34;42 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_without_auth&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;42 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_routes.py::test_create_product_with_insufficient_permissions&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_insufficient_permissions&#34;, &#34;duration&#34;: &#34;933 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_insufficient_permissions&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;933 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:42,752 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;knappmatthew@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:43,050 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:43,054 - common.logging_config - INFO - User 1 has role: Customer\n2026-04-17 12:07:43,058 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.VIEW&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;knappmatthew@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Customer\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.VIEW&amp;#x27;]\n\n&#34;}], &#34;tests/test_routes.py::test_create_product[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product[Admin]&#34;, &#34;duration&#34;: &#34;937 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;937 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:43,104 - tests.conftest - INFO - Test Product: {&amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;price&amp;#x27;: Decimal(&amp;#x27;906.63&amp;#x27;), &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:43,104 - tests.conftest - INFO - Test Product: {&amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;price&amp;#x27;: Decimal(&amp;#x27;906.63&amp;#x27;), &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:43,682 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;waltonkatie@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:43,975 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:43,978 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:43,984 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:43,985 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: &amp;#x27;906.63&amp;#x27;}\n2026-04-17 12:07:43,990 - tests.conftest - INFO - Response body: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: 906.63}\n2026-04-17 12:07:43,990 - tests.conftest - INFO - Response body: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: 906.63}\n2026-04-17 12:07:43,991 - tests.conftest - INFO - post_response.headers: Content-Type: application/json\r\nContent-Length: 201\r\nLocation: https://localhost/api/v1/products/1\r\nX-Frame-Options: SAMEORIGIN\r\nX-XSS-Protection: 1; mode=block\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src &amp;#x27;self&amp;#x27;; script-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net https://code.jquery.com; style-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net; font-src &amp;#x27;self&amp;#x27; https://fonts.bunny.net; img-src &amp;#x27;self&amp;#x27; data: https://your-image-cdn.example.com; connect-src &amp;#x27;self&amp;#x27; https://your-api.example.com https://another-trusted-service.example.com; frame-src &amp;#x27;none&amp;#x27;; object-src &amp;#x27;none&amp;#x27;; base-uri &amp;#x27;self&amp;#x27;; form-action &amp;#x27;self&amp;#x27;\r\nStrict-Transport-Security: max-age=31556926; includeSubDomains\r\nReferrer-Policy: strict-origin-when-cross-origin\r\n\r\n\n2026-04-17 12:07:43,991 - tests.conftest - INFO - post_response.headers: Content-Type: application/json\r\nContent-Length: 201\r\nLocation: https://localhost/api/v1/products/1\r\nX-Frame-Options: SAMEORIGIN\r\nX-XSS-Protection: 1; mode=block\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src &amp;#x27;self&amp;#x27;; script-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net https://code.jquery.com; style-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net; font-src &amp;#x27;self&amp;#x27; https://fonts.bunny.net; img-src &amp;#x27;self&amp;#x27; data: https://your-image-cdn.example.com; connect-src &amp;#x27;self&amp;#x27; https://your-api.example.com https://another-trusted-service.example.com; frame-src &amp;#x27;none&amp;#x27;; object-src &amp;#x27;none&amp;#x27;; base-uri &amp;#x27;self&amp;#x27;; form-action &amp;#x27;self&amp;#x27;\r\nStrict-Transport-Security: max-age=31556926; includeSubDomains\r\nReferrer-Policy: strict-origin-when-cross-origin\r\n\r\n\n2026-04-17 12:07:43,993 - tests.conftest - INFO - Location of the product created: https://localhost/api/v1/products/1\n2026-04-17 12:07:43,993 - tests.conftest - INFO - Location of the product created: https://localhost/api/v1/products/1\n2026-04-17 12:07:43,994 - common.logging_config - INFO - Request to Retrieve a product with id [1]\n2026-04-17 12:07:43,994 - common.logging_config - INFO - Processing lookup for id 1 ...\n2026-04-17 12:07:43,997 - common.logging_config - INFO - Returning product: Pants\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:128 Test Product: {&amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;price&amp;#x27;: Decimal(&amp;#x27;906.63&amp;#x27;), &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;waltonkatie@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: &amp;#x27;906.63&amp;#x27;}\nINFO     tests.conftest:test_routes.py:137 Response body: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Model nothing brother good peace.\\nDecision worker hand coach new two add. When night lay. Light try keep reach.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: 906.63}\nINFO     tests.conftest:test_routes.py:141 post_response.headers: Content-Type: application/json\r\nContent-Length: 201\r\nLocation: https://localhost/api/v1/products/1\r\nX-Frame-Options: SAMEORIGIN\r\nX-XSS-Protection: 1; mode=block\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src &amp;#x27;self&amp;#x27;; script-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net https://code.jquery.com; style-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net; font-src &amp;#x27;self&amp;#x27; https://fonts.bunny.net; img-src &amp;#x27;self&amp;#x27; data: https://your-image-cdn.example.com; connect-src &amp;#x27;self&amp;#x27; https://your-api.example.com https://another-trusted-service.example.com; frame-src &amp;#x27;none&amp;#x27;; object-src &amp;#x27;none&amp;#x27;; base-uri &amp;#x27;self&amp;#x27;; form-action &amp;#x27;self&amp;#x27;\r\nStrict-Transport-Security: max-age=31556926; includeSubDomains\r\nReferrer-Policy: strict-origin-when-cross-origin\r\n\r\n\nINFO     tests.conftest:test_routes.py:144 Location of the product created: https://localhost/api/v1/products/1\nINFO     common.logging_config:products.py:50 Request to Retrieve a product with id [1]\nINFO     common.logging_config:product.py:77 Processing lookup for id 1 ...\nINFO     common.logging_config:products.py:56 Returning product: Pants\n\n&#34;}], &#34;tests/test_routes.py::test_create_product[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product[Sales Manager]&#34;, &#34;duration&#34;: &#34;926 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;926 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:44,039 - tests.conftest - INFO - Test Product: {&amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;price&amp;#x27;: Decimal(&amp;#x27;526.65&amp;#x27;), &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:44,039 - tests.conftest - INFO - Test Product: {&amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;price&amp;#x27;: Decimal(&amp;#x27;526.65&amp;#x27;), &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:44,618 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;kevinpalmer@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:44,910 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:44,913 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:44,916 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n2026-04-17 12:07:44,917 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;price&amp;#x27;: &amp;#x27;526.65&amp;#x27;}\n2026-04-17 12:07:44,922 - tests.conftest - INFO - Response body: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;price&amp;#x27;: 526.65}\n2026-04-17 12:07:44,922 - tests.conftest - INFO - Response body: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;price&amp;#x27;: 526.65}\n2026-04-17 12:07:44,922 - tests.conftest - INFO - post_response.headers: Content-Type: application/json\r\nContent-Length: 205\r\nLocation: https://localhost/api/v1/products/1\r\nX-Frame-Options: SAMEORIGIN\r\nX-XSS-Protection: 1; mode=block\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src &amp;#x27;self&amp;#x27;; script-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net https://code.jquery.com; style-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net; font-src &amp;#x27;self&amp;#x27; https://fonts.bunny.net; img-src &amp;#x27;self&amp;#x27; data: https://your-image-cdn.example.com; connect-src &amp;#x27;self&amp;#x27; https://your-api.example.com https://another-trusted-service.example.com; frame-src &amp;#x27;none&amp;#x27;; object-src &amp;#x27;none&amp;#x27;; base-uri &amp;#x27;self&amp;#x27;; form-action &amp;#x27;self&amp;#x27;\r\nStrict-Transport-Security: max-age=31556926; includeSubDomains\r\nReferrer-Policy: strict-origin-when-cross-origin\r\n\r\n\n2026-04-17 12:07:44,922 - tests.conftest - INFO - post_response.headers: Content-Type: application/json\r\nContent-Length: 205\r\nLocation: https://localhost/api/v1/products/1\r\nX-Frame-Options: SAMEORIGIN\r\nX-XSS-Protection: 1; mode=block\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src &amp;#x27;self&amp;#x27;; script-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net https://code.jquery.com; style-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net; font-src &amp;#x27;self&amp;#x27; https://fonts.bunny.net; img-src &amp;#x27;self&amp;#x27; data: https://your-image-cdn.example.com; connect-src &amp;#x27;self&amp;#x27; https://your-api.example.com https://another-trusted-service.example.com; frame-src &amp;#x27;none&amp;#x27;; object-src &amp;#x27;none&amp;#x27;; base-uri &amp;#x27;self&amp;#x27;; form-action &amp;#x27;self&amp;#x27;\r\nStrict-Transport-Security: max-age=31556926; includeSubDomains\r\nReferrer-Policy: strict-origin-when-cross-origin\r\n\r\n\n2026-04-17 12:07:44,922 - tests.conftest - INFO - Location of the product created: https://localhost/api/v1/products/1\n2026-04-17 12:07:44,922 - tests.conftest - INFO - Location of the product created: https://localhost/api/v1/products/1\n2026-04-17 12:07:44,923 - common.logging_config - INFO - Request to Retrieve a product with id [1]\n2026-04-17 12:07:44,923 - common.logging_config - INFO - Processing lookup for id 1 ...\n2026-04-17 12:07:44,925 - common.logging_config - INFO - Returning product: Shirt\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:128 Test Product: {&amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;price&amp;#x27;: Decimal(&amp;#x27;526.65&amp;#x27;), &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;kevinpalmer@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;id&amp;#x27;: None, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;price&amp;#x27;: &amp;#x27;526.65&amp;#x27;}\nINFO     tests.conftest:test_routes.py:137 Response body: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Admit environmental center bad number despite.\\nSide explain wide paper agreement word. Pull ok note expert garden.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Shirt&amp;#x27;, &amp;#x27;price&amp;#x27;: 526.65}\nINFO     tests.conftest:test_routes.py:141 post_response.headers: Content-Type: application/json\r\nContent-Length: 205\r\nLocation: https://localhost/api/v1/products/1\r\nX-Frame-Options: SAMEORIGIN\r\nX-XSS-Protection: 1; mode=block\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src &amp;#x27;self&amp;#x27;; script-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net https://code.jquery.com; style-src &amp;#x27;self&amp;#x27; https://cdn.jsdelivr.net; font-src &amp;#x27;self&amp;#x27; https://fonts.bunny.net; img-src &amp;#x27;self&amp;#x27; data: https://your-image-cdn.example.com; connect-src &amp;#x27;self&amp;#x27; https://your-api.example.com https://another-trusted-service.example.com; frame-src &amp;#x27;none&amp;#x27;; object-src &amp;#x27;none&amp;#x27;; base-uri &amp;#x27;self&amp;#x27;; form-action &amp;#x27;self&amp;#x27;\r\nStrict-Transport-Security: max-age=31556926; includeSubDomains\r\nReferrer-Policy: strict-origin-when-cross-origin\r\n\r\n\nINFO     tests.conftest:test_routes.py:144 Location of the product created: https://localhost/api/v1/products/1\nINFO     common.logging_config:products.py:50 Request to Retrieve a product with id [1]\nINFO     common.logging_config:product.py:77 Processing lookup for id 1 ...\nINFO     common.logging_config:products.py:56 Returning product: Shirt\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_no_name[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_no_name[Admin]&#34;, &#34;duration&#34;: &#34;923 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_no_name[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;923 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:44,969 - tests.conftest - INFO - Product with no name: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;My worry right. Material together carry project street sure grow.\\nMemory fact growth step effect one site.&amp;#x27;, &amp;#x27;price&amp;#x27;: 973.7, &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:44,969 - tests.conftest - INFO - Product with no name: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;My worry right. Material together carry project street sure grow.\\nMemory fact growth step effect one site.&amp;#x27;, &amp;#x27;price&amp;#x27;: 973.7, &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:45,552 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;brianshah@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:45,844 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:45,847 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:45,849 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:45,850 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;My worry right. Material together carry project street sure grow.\\nMemory fact growth step effect one site.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;price&amp;#x27;: 973.7}\n2026-04-17 12:07:45,850 - common.logging_config - ERROR - No product name specified.\n2026-04-17 12:07:45,851 - tests.conftest - INFO - response: 400\n2026-04-17 12:07:45,851 - tests.conftest - INFO - response: 400\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:168 Product with no name: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;My worry right. Material together carry project street sure grow.\\nMemory fact growth step effect one site.&amp;#x27;, &amp;#x27;price&amp;#x27;: 973.7, &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;brianshah@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;My worry right. Material together carry project street sure grow.\\nMemory fact growth step effect one site.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;price&amp;#x27;: 973.7}\nERROR    common.logging_config:products.py:67 No product name specified.\nINFO     tests.conftest:test_routes.py:179 response: 400\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_no_name[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_no_name[Sales Manager]&#34;, &#34;duration&#34;: &#34;922 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_no_name[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;922 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:45,896 - tests.conftest - INFO - Product with no name: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Choose evidence she rather star. Expert political table rest benefit.\\nField difficult would phone. Catch mouth apply room buy bed. Practice what trouble data hair happy.&amp;#x27;, &amp;#x27;price&amp;#x27;: 149.2, &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:45,896 - tests.conftest - INFO - Product with no name: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Choose evidence she rather star. Expert political table rest benefit.\\nField difficult would phone. Catch mouth apply room buy bed. Practice what trouble data hair happy.&amp;#x27;, &amp;#x27;price&amp;#x27;: 149.2, &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:46,475 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;jessicawhite@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:46,767 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:46,770 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:46,772 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n2026-04-17 12:07:46,773 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Choose evidence she rather star. Expert political table rest benefit.\\nField difficult would phone. Catch mouth apply room buy bed. Practice what trouble data hair happy.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;price&amp;#x27;: 149.2}\n2026-04-17 12:07:46,773 - common.logging_config - ERROR - No product name specified.\n2026-04-17 12:07:46,774 - tests.conftest - INFO - response: 400\n2026-04-17 12:07:46,774 - tests.conftest - INFO - response: 400\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:168 Product with no name: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Choose evidence she rather star. Expert political table rest benefit.\\nField difficult would phone. Catch mouth apply room buy bed. Practice what trouble data hair happy.&amp;#x27;, &amp;#x27;price&amp;#x27;: 149.2, &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;jessicawhite@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Choose evidence she rather star. Expert political table rest benefit.\\nField difficult would phone. Catch mouth apply room buy bed. Practice what trouble data hair happy.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;price&amp;#x27;: 149.2}\nERROR    common.logging_config:products.py:67 No product name specified.\nINFO     tests.conftest:test_routes.py:179 response: 400\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_no_price[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_no_price[Admin]&#34;, &#34;duration&#34;: &#34;921 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_no_price[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;921 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:46,816 - tests.conftest - INFO - Product with no price: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Hammer&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Goal certain east past beat. Nearly piece onto six notice. Range group suggest answer.&amp;#x27;, &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:46,816 - tests.conftest - INFO - Product with no price: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Hammer&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Goal certain east past beat. Nearly piece onto six notice. Range group suggest answer.&amp;#x27;, &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:47,397 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;smartinez@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:47,690 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:47,693 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:47,695 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:47,696 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Goal certain east past beat. Nearly piece onto six notice. Range group suggest answer.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Hammer&amp;#x27;}\n2026-04-17 12:07:47,696 - common.logging_config - ERROR - No product price specified.\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:190 Product with no price: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Hammer&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Goal certain east past beat. Nearly piece onto six notice. Range group suggest answer.&amp;#x27;, &amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1}\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;smartinez@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Goal certain east past beat. Nearly piece onto six notice. Range group suggest answer.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Hammer&amp;#x27;}\nERROR    common.logging_config:products.py:74 No product price specified.\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_no_price[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_no_price[Sales Manager]&#34;, &#34;duration&#34;: &#34;920 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_no_price[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;920 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:47,738 - tests.conftest - INFO - Product with no price: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Chevy&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Condition against site focus price television. Resource often describe. Rate policy might.\\nThere third together century others church stock away. Service opportunity owner board entire both smile.&amp;#x27;, &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:47,738 - tests.conftest - INFO - Product with no price: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Chevy&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Condition against site focus price television. Resource often describe. Rate policy might.\\nThere third together century others church stock away. Service opportunity owner board entire both smile.&amp;#x27;, &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\n2026-04-17 12:07:48,317 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;zamorasamantha@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:48,611 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:48,614 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:48,616 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n2026-04-17 12:07:48,617 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Condition against site focus price television. Resource often describe. Rate policy might.\\nThere third together century others church stock away. Service opportunity owner board entire both smile.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Chevy&amp;#x27;}\n2026-04-17 12:07:48,617 - common.logging_config - ERROR - No product price specified.\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:190 Product with no price: {&amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Chevy&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Condition against site focus price television. Resource often describe. Rate policy might.\\nThere third together century others church stock away. Service opportunity owner board entire both smile.&amp;#x27;, &amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1}\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;zamorasamantha@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: True, &amp;#x27;category_id&amp;#x27;: 1, &amp;#x27;description&amp;#x27;: &amp;#x27;Condition against site focus price television. Resource often describe. Rate policy might.\\nThere third together century others church stock away. Service opportunity owner board entire both smile.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Chevy&amp;#x27;}\nERROR    common.logging_config:products.py:74 No product price specified.\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_no_category_id[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_no_category_id[Admin]&#34;, &#34;duration&#34;: &#34;994 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_no_category_id[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;994 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:49,314 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;lyonsdebbie@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:49,607 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:49,610 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:49,612 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:49,613 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;description&amp;#x27;: &amp;#x27;Respond amount company everything. Above make half room forward sometimes fly.\\nCivil authority figure court thus. Action four today enough. Maybe relationship since call.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Ford&amp;#x27;, &amp;#x27;price&amp;#x27;: 590.52}\n2026-04-17 12:07:49,613 - common.logging_config - ERROR - No valid category_id specified\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;lyonsdebbie@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;description&amp;#x27;: &amp;#x27;Respond amount company everything. Above make half room forward sometimes fly.\\nCivil authority figure court thus. Action four today enough. Maybe relationship since call.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Ford&amp;#x27;, &amp;#x27;price&amp;#x27;: 590.52}\nERROR    common.logging_config:products.py:83 No valid category_id specified\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_no_category_id[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_no_category_id[Sales Manager]&#34;, &#34;duration&#34;: &#34;920 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_no_category_id[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;920 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:50,235 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;mclaughlintracy@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:50,528 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:50,531 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:50,533 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n2026-04-17 12:07:50,534 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;description&amp;#x27;: &amp;#x27;Focus know less responsibility. Only away country young.\\nNorth production create painting perform million start senior. State think brother town knowledge tell as.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pots&amp;#x27;, &amp;#x27;price&amp;#x27;: 982.99}\n2026-04-17 12:07:50,534 - common.logging_config - ERROR - No valid category_id specified\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;mclaughlintracy@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;description&amp;#x27;: &amp;#x27;Focus know less responsibility. Only away country young.\\nNorth production create painting perform million start senior. State think brother town knowledge tell as.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pots&amp;#x27;, &amp;#x27;price&amp;#x27;: 982.99}\nERROR    common.logging_config:products.py:83 No valid category_id specified\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_a_nonexistent_category_id[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_a_nonexistent_category_id[Admin]&#34;, &#34;duration&#34;: &#34;920 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_a_nonexistent_category_id[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;920 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:51,155 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;christinathompson@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:51,447 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:51,450 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:51,452 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:51,453 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 999, &amp;#x27;description&amp;#x27;: &amp;#x27;High responsibility red fight successful. Song pull choice. Among production coach doctor local new various response.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: 1339.16}\n2026-04-17 12:07:51,455 - common.logging_config - ERROR - Could not find category with id 999 when creating product\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;christinathompson@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 999, &amp;#x27;description&amp;#x27;: &amp;#x27;High responsibility red fight successful. Song pull choice. Among production coach doctor local new various response.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Pants&amp;#x27;, &amp;#x27;price&amp;#x27;: 1339.16}\nERROR    common.logging_config:products.py:90 Could not find category with id 999 when creating product\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_with_a_nonexistent_category_id[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_with_a_nonexistent_category_id[Sales Manager]&#34;, &#34;duration&#34;: &#34;922 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_with_a_nonexistent_category_id[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;922 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:52,077 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;smithdavid@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:52,370 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:52,373 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:52,375 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n2026-04-17 12:07:52,376 - common.logging_config - INFO - Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 999, &amp;#x27;description&amp;#x27;: &amp;#x27;Last media expect compare. Artist finish myself five today right rock.\\nDegree second former field and man. Time contain knowledge public reach fill possible bank.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Towels&amp;#x27;, &amp;#x27;price&amp;#x27;: 1707.5}\n2026-04-17 12:07:52,378 - common.logging_config - ERROR - Could not find category with id 999 when creating product\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;smithdavid@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\nINFO     common.logging_config:products.py:64 Processing: {&amp;#x27;available&amp;#x27;: False, &amp;#x27;category_id&amp;#x27;: 999, &amp;#x27;description&amp;#x27;: &amp;#x27;Last media expect compare. Artist finish myself five today right rock.\\nDegree second former field and man. Time contain knowledge public reach fill possible bank.&amp;#x27;, &amp;#x27;id&amp;#x27;: 1, &amp;#x27;name&amp;#x27;: &amp;#x27;Towels&amp;#x27;, &amp;#x27;price&amp;#x27;: 1707.5}\nERROR    common.logging_config:products.py:90 Could not find category with id 999 when creating product\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_no_content_type[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_no_content_type[Admin]&#34;, &#34;duration&#34;: &#34;915 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_no_content_type[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;915 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:52,993 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;icarrillo@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:53,285 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:53,288 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:53,290 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;icarrillo@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_no_content_type[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_no_content_type[Sales Manager]&#34;, &#34;duration&#34;: &#34;910 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_no_content_type[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;910 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:53,907 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;davidharper@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:54,199 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:54,203 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:54,204 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;davidharper@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_wrong_content_type[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_wrong_content_type[Admin]&#34;, &#34;duration&#34;: &#34;915 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_wrong_content_type[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;915 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:54,819 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;mary16@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:55,114 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:55,118 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:55,120 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;mary16@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n\n&#34;}], &#34;tests/test_routes.py::test_create_product_wrong_content_type[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_product_wrong_content_type[Sales Manager]&#34;, &#34;duration&#34;: &#34;913 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_product_wrong_content_type[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;913 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:55,736 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;amber72@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:56,029 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.CREATE\n2026-04-17 12:07:56,032 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:56,034 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;amber72@example.net&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.CREATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n\n&#34;}], &#34;tests/test_routes.py::test_create_multiple_products[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_multiple_products[Admin]&#34;, &#34;duration&#34;: &#34;50 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_multiple_products[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;50 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:56,083 - tests.conftest - INFO - Test Products: [&amp;lt;Product Chevy id=[1]&amp;gt;, &amp;lt;Product Pants id=[2]&amp;gt;, &amp;lt;Product Banana id=[3]&amp;gt;, &amp;lt;Product Apple id=[4]&amp;gt;, &amp;lt;Product Ford id=[5]&amp;gt;]\n2026-04-17 12:07:56,083 - tests.conftest - INFO - Test Products: [&amp;lt;Product Chevy id=[1]&amp;gt;, &amp;lt;Product Pants id=[2]&amp;gt;, &amp;lt;Product Banana id=[3]&amp;gt;, &amp;lt;Product Apple id=[4]&amp;gt;, &amp;lt;Product Ford id=[5]&amp;gt;]\n2026-04-17 12:07:56,085 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:56,087 - tests.conftest - INFO - The current number of products: 5\n2026-04-17 12:07:56,087 - tests.conftest - INFO - The current number of products: 5\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:276 Test Products: [&amp;lt;Product Chevy id=[1]&amp;gt;, &amp;lt;Product Pants id=[2]&amp;gt;, &amp;lt;Product Banana id=[3]&amp;gt;, &amp;lt;Product Apple id=[4]&amp;gt;, &amp;lt;Product Ford id=[5]&amp;gt;]\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_routes.py:30 The current number of products: 5\n\n&#34;}], &#34;tests/test_routes.py::test_create_multiple_products[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_create_multiple_products[Sales Manager]&#34;, &#34;duration&#34;: &#34;50 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_create_multiple_products[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;50 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:56,134 - tests.conftest - INFO - Test Products: [&amp;lt;Product Towels id=[1]&amp;gt;, &amp;lt;Product Chevy id=[2]&amp;gt;, &amp;lt;Product Wrench id=[3]&amp;gt;, &amp;lt;Product Ford id=[4]&amp;gt;, &amp;lt;Product Shirt id=[5]&amp;gt;]\n2026-04-17 12:07:56,134 - tests.conftest - INFO - Test Products: [&amp;lt;Product Towels id=[1]&amp;gt;, &amp;lt;Product Chevy id=[2]&amp;gt;, &amp;lt;Product Wrench id=[3]&amp;gt;, &amp;lt;Product Ford id=[4]&amp;gt;, &amp;lt;Product Shirt id=[5]&amp;gt;]\n2026-04-17 12:07:56,135 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:56,138 - tests.conftest - INFO - The current number of products: 5\n2026-04-17 12:07:56,138 - tests.conftest - INFO - The current number of products: 5\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:276 Test Products: [&amp;lt;Product Towels id=[1]&amp;gt;, &amp;lt;Product Chevy id=[2]&amp;gt;, &amp;lt;Product Wrench id=[3]&amp;gt;, &amp;lt;Product Ford id=[4]&amp;gt;, &amp;lt;Product Shirt id=[5]&amp;gt;]\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_routes.py:30 The current number of products: 5\n\n&#34;}], &#34;tests/test_routes.py::test_get_product&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_get_product&#34;, &#34;duration&#34;: &#34;43 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_get_product&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;43 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:56,180 - common.logging_config - INFO - Request to Retrieve a product with id [1]\n2026-04-17 12:07:56,181 - common.logging_config - INFO - Processing lookup for id 1 ...\n2026-04-17 12:07:56,181 - common.logging_config - INFO - Returning product: Hat\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:products.py:50 Request to Retrieve a product with id [1]\nINFO     common.logging_config:product.py:77 Processing lookup for id 1 ...\nINFO     common.logging_config:products.py:56 Returning product: Hat\n\n&#34;}], &#34;tests/test_routes.py::test_get_product_not_found&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_get_product_not_found&#34;, &#34;duration&#34;: &#34;42 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_get_product_not_found&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;42 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:56,221 - common.logging_config - INFO - Request to Retrieve a product with id [0]\n2026-04-17 12:07:56,222 - common.logging_config - INFO - Processing lookup for id 0 ...\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:products.py:50 Request to Retrieve a product with id [0]\nINFO     common.logging_config:product.py:77 Processing lookup for id 0 ...\n\n&#34;}], &#34;tests/test_routes.py::test_update_product[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_update_product[Admin]&#34;, &#34;duration&#34;: &#34;963 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_update_product[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;963 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:56,889 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;carrie18@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:57,180 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.UPDATE\n2026-04-17 12:07:57,183 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:57,185 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:57,186 - common.logging_config - INFO - Saving Updated Name\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;carrie18@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.UPDATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:product.py:46 Saving Updated Name\n\n&#34;}], &#34;tests/test_routes.py::test_update_product[Sales Manager]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_update_product[Sales Manager]&#34;, &#34;duration&#34;: &#34;918 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_update_product[Sales Manager]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;918 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:57,809 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;jenniferrice@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:58,099 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.UPDATE\n2026-04-17 12:07:58,102 - common.logging_config - INFO - User 1 has role: Sales Manager\n2026-04-17 12:07:58,104 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\n2026-04-17 12:07:58,106 - common.logging_config - INFO - Saving Updated Name\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;jenniferrice@example.org&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.UPDATE\nINFO     common.logging_config:auth.py:75 User 1 has role: Sales Manager\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.CREATE&amp;#x27;, &amp;#x27;PRODUCT.UPDATE&amp;#x27;, &amp;#x27;PRODUCT.VIEW&amp;#x27;]\nINFO     common.logging_config:product.py:46 Saving Updated Name\n\n&#34;}], &#34;tests/test_routes.py::test_delete_product[Admin]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_delete_product[Admin]&#34;, &#34;duration&#34;: &#34;929 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_delete_product[Admin]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;929 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:58,154 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:58,156 - tests.conftest - INFO - The current number of products: 5\n2026-04-17 12:07:58,156 - tests.conftest - INFO - The current number of products: 5\n2026-04-17 12:07:58,735 - common.logging_config - INFO - Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;vcurtis@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\n2026-04-17 12:07:59,026 - common.logging_config - INFO - Cache key: permission:1:PRODUCT.DELETE\n2026-04-17 12:07:59,029 - common.logging_config - INFO - User 1 has role: Admin\n2026-04-17 12:07:59,031 - common.logging_config - INFO - User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\n2026-04-17 12:07:59,034 - common.logging_config - INFO - Request to Retrieve a product with id [1]\n2026-04-17 12:07:59,034 - common.logging_config - INFO - Processing lookup for id 1 ...\n2026-04-17 12:07:59,038 - common.logging_config - INFO - Processing all Products\n2026-04-17 12:07:59,039 - tests.conftest - INFO - The current number of products: 4\n2026-04-17 12:07:59,039 - tests.conftest - INFO - The current number of products: 4\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_routes.py:30 The current number of products: 5\nINFO     common.logging_config:auth.py:100 Login attempt with data: {&amp;#x27;email&amp;#x27;: &amp;#x27;vcurtis@example.com&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;test_pass&amp;#x27;}\nINFO     common.logging_config:auth.py:69 Cache key: permission:1:PRODUCT.DELETE\nINFO     common.logging_config:auth.py:75 User 1 has role: Admin\nINFO     common.logging_config:auth.py:76 User permissions: [&amp;#x27;PRODUCT.*&amp;#x27;, &amp;#x27;CATEGORY.*&amp;#x27;, &amp;#x27;SUPPLIER.*&amp;#x27;, &amp;#x27;ARTICLE.*&amp;#x27;]\nINFO     common.logging_config:products.py:50 Request to Retrieve a product with id [1]\nINFO     common.logging_config:product.py:77 Processing lookup for id 1 ...\nINFO     common.logging_config:product.py:62 Processing all Products\nINFO     tests.conftest:test_routes.py:30 The current number of products: 4\n\n&#34;}], &#34;tests/test_routes.py::test_get_product_list&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_get_product_list&#34;, &#34;duration&#34;: &#34;45 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_get_product_list&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;45 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:59,083 - common.logging_config - INFO - Processing all Products\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:62 Processing all Products\n\n&#34;}], &#34;tests/test_routes.py::test_query_by_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_query_by_name&#34;, &#34;duration&#34;: &#34;48 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_query_by_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;48 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:59,132 - common.logging_config - INFO - Processing name query for Towels ...\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:92 Processing name query for Towels ...\n\n&#34;}], &#34;tests/test_routes.py::test_query_by_category&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_query_by_category&#34;, &#34;duration&#34;: &#34;51 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_query_by_category&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;51 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:59,184 - tests.conftest - INFO - Number of products with category_id 4: 0\n2026-04-17 12:07:59,184 - tests.conftest - INFO - Number of products with category_id 4: 0\n2026-04-17 12:07:59,186 - common.logging_config - INFO - Processing category_id for 4 ...\n\n------------------------------ Captured log call -------------------------------\nINFO     tests.conftest:test_routes.py:435 Number of products with category_id 4: 0\nINFO     common.logging_config:product.py:121 Processing category_id for 4 ...\n\n&#34;}], &#34;tests/test_routes.py::test_query_by_availability&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_routes.py::test_query_by_availability&#34;, &#34;duration&#34;: &#34;49 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_routes.py::test_query_by_availability&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;49 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;----------------------------- Captured stderr call -----------------------------\n2026-04-17 12:07:59,233 - common.logging_config - INFO - Processing available query for False ...\n\n------------------------------ Captured log call -------------------------------\nINFO     common.logging_config:product.py:107 Processing available query for False ...\n\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>

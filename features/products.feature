@@ -68,3 +68,36 @@ Scenario: Cannot create a product without a name
     Then I should see the message "Product name is required"
 
 
+
+Scenario: Cannot create a product without a price
+    Given I am logged in as an admin
+    When I visit the "Home Page"
+    And I set the "Name" to "Hat"
+		And I leave the "Price" field empty
+    And I press the "Create" button
+    Then I should see the message "Valid price is required"
+
+
+
+Scenario: Update an existing product
+    Given I am logged in as an admin
+    And a product named "Hat" already exists
+    When I visit the "Home Page"
+		And I set the "Name" to "Hat"
+    And I press the "Search" button
+		Then I should see the message "Found 1 product(s)"
+    And I should see "Hat" in the "Name" field
+
+    When I set the "Name" to "Wrench"
+    And I set the "Description" to "Heavy duty wrench"
+    And I select "False" in the "Available" dropdown
+    And I select "Tools" in the "Category" dropdown
+    And I set the "Price" to "49.95"
+    And I press the "Update" button
+
+    Then I should see the message "Product updated successfully"
+    And I should see "Wrench" in the "Name" field
+    And I should see "Heavy duty wrench" in the "Description" field
+    And I should see "False" in the "Available" dropdown
+    And I should see "Tools" in the "Category" dropdown
+    And I should see "49.95" in the "Price" field

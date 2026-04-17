@@ -57,6 +57,15 @@ test: ## Run tests
 	@echo "Running pytest (in a container)..."
 	@docker-compose exec test pytest tests/ -v
 
+.PHONY: test-with-html-report
+test-with-html-report:
+  @docker-compose exec test pip install pytest-html
+	@docker-compose exec test pytest tests --no-cov  --disable-warnings --html=report.html --self-contained-html
+
+.PHONY: copy-report-to-local-machine
+copy-report-to-local-machine:
+	@docker cp $(docker-compose ps -q test):/app/report.html ./report.html
+
 # ---
 
 # Start SonarQube container

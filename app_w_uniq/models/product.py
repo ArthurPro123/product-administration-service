@@ -7,7 +7,7 @@ logger = helper_setup_logging()
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), index=True, nullable=False)
+    name = db.Column(db.String(64), index=True, nullable=False, unique=True)
     description = db.Column(db.String(256))
     price = db.Column(db.Float, nullable=False)
     available = db.Column(db.Boolean(), nullable=False, default=True)

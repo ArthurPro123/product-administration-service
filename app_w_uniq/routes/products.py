@@ -70,6 +70,12 @@ def create_product():
             f"Product name must be specified",
         )
 
+    # Check for duplicate name
+    existing_product = Product.query.filter_by(name=data['name']).first()
+    if existing_product:
+        return jsonify({"message": "Product with this name already exists"}), status.HTTP_409_CONFLICT
+
+
     if data.get('price') is None:
         logger.error("No product price specified.")
         abort(
