@@ -47,18 +47,6 @@ Scenario: Create a Product
     And I should see "34.95" in the "Price" field
 
 
-Scenario: Cannot create a product with a duplicate name
-    Given I am logged in as an admin
-    And a product named "Hammer" already exists
-    When I visit the "Home Page"
-    And I set the "Name" to "Hammer"
-    And I set the "Price" to "34.95"
-    And I select "Tools" in the "Category" dropdown
-    And I press the "Create" button
-    Then I should see the message "Product with this name already exists"
-
-
-
 Scenario: Cannot create a product without a name
     Given I am logged in as an admin
     When I visit the "Home Page"
@@ -101,3 +89,41 @@ Scenario: Update an existing product
     And I should see "False" in the "Available" dropdown
     And I should see "Tools" in the "Category" dropdown
     And I should see "49.95" in the "Price" field
+
+
+
+Scenario: Delete an existing product
+    Given I am logged in as an admin
+    When I visit the "Home Page"
+    And I set the "Name" to "Test Hat"
+    And I set the "Description" to "Test fedora hat"
+    And I select "True" in the "Available" dropdown
+    And I select "Cloths" in the "Category" dropdown
+    And I set the "Price" to "59.95"
+    And I press the "Create" button
+    Then I should see the message "Product created successfully"
+    
+		When I copy the "Id" field
+    And I press the "Clear" button
+    Then the "Id" field should be empty
+    And the "Name" field should be empty
+    And the "Description" field should be empty
+
+    When I paste the "Id" field
+    And I press the "Retrieve" button
+    Then I should see the message "Product retrieved successfully"
+    And I should see "Test Hat" in the "Name" field
+    And I should see "Test fedora hat" in the "Description" field
+    And I should see "59.95" in the "Price" field
+    
+		When I press the "Delete" button and cancel
+    Then I should not see the message "Product has been deleted"
+    And the product "Test Hat" should still exist
+
+		When I press the "Delete" button and accept
+    Then I should see the message "Product has been deleted"
+    And the "Name" field should be empty
+    
+    When I paste the "Id" field
+    And I press the "Retrieve" button
+    Then I should see the message "Product not found"

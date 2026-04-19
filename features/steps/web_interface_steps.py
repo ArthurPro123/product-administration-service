@@ -77,6 +77,11 @@ def step_impl(context, expected_text):
     """Verify flash message appears"""
     expect(context.page.locator("#flash_message")).to_contain_text(expected_text)
 
+@then('I should not see the message "{unexpected_text}"')
+def step_impl(context, unexpected_text):
+    """Verify flash message does NOT contain text"""
+    expect(context.page.locator("#flash_message")).not_to_contain_text(unexpected_text)
+
 
 @then('I should see "{expected_text}" in the "{element_name}" dropdown')
 def step_impl(context, expected_text, element_name):
@@ -131,3 +136,88 @@ def step_impl(context, product_name):
     
     # Store for potential later use
     context.stored_product_id = product_id
+
+
+
+# --- Additional Definitions for Removing a Product --- #
+
+
+@when('I press the "Delete" button and cancel')
+def step_impl(context):
+    """Press Delete button and cancel the confirmation dialog"""
+
+    def handle_dialog(dialog):
+        dialog.dismiss()
+
+    context.page.once('dialog', handle_dialog)
+
+    context.page.click("#delete-btn")
+    context.page.wait_for_load_state("networkidle")
+    import time
+    time.sleep(0.5)
+
+
+@when('I press the "Delete" button and accept')
+def step_impl(context):
+    """Press Delete button and accept the confirmation dialog"""
+
+    def handle_dialog(dialog):
+        dialog.accept()
+
+    context.page.once('dialog', handle_dialog)
+
+    context.page.click("#delete-btn")
+    context.page.wait_for_load_state("networkidle")
+    import time
+    time.sleep(0.5)
+
+
+@then('the "{element_name}" field should contain the ID of the product named "{product_name}"')
+def step_impl(context, element_name, product_name):
+
+    """Verify the ID field contains the expected product ID"""
+
+    element_id = helper_get_element_id(element_name)
+    actual_id = context.page.input_value(f"#{element_id}")
+    
+    # Get the product ID from the stored product (from helper_ensure_product_exists)
+    # You may need to store product IDs during creation
+    assert actual_id == context.stored_product_id, \
+        f"Expected ID '{context.stored_product_id}', got '{actual_id}'"
+
+
+@then('the retrieved product should be "{product_name}"')
+def step_impl(context, product_name):
+    """Verify the retrieved product matches expected product"""
+    name_field_id = helper_get_element_id("Name")
+    actual_name = context.page.input_value(f"#{name_field_id}")
+    
+    assert actual_name == product_name, \
+        f"Expected product '{product_name}', got '{actual_name}'"
+
+
+@then('the product named "{product_name}" should still exist')
+@then('the product "{product_name}" should still exist')
+def step_impl(context, product_name):
+    """Verify product still exists in the system"""
+    # Search for the product
+    context.page.fill("#product_name", product_name)
+    context.page.click("#search-btn")
+    context.page.wait_for_load_state("networkidle")
+    
+    flash_message = context.page.locator("#flash_message").text_content()
+    assert "Found" in flash_message, \
+        f"Product '{product_name}' should still exist but was not found"
+
+
+@then('the product named "{product_name}" should no longer exist')
+def step_impl(context, product_name):
+    """Verify product has been deleted"""
+    # Search for the product
+    context.page.fill("#product_name", product_name)
+    context.page.click("#search-btn")
+    context.page.wait_for_load_state("networkidle")
+    
+    flash_message = context.page.locator("#flash_message").text_content()
+    assert "No products found" in flash_message or "Found 0" in flash_message, \
+        f"Product '{product_name}' should not exist but was found"
